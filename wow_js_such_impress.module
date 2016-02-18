@@ -1,0 +1,116 @@
+<?php
+
+/**
+ * @file
+ * Backdrop integration with wow.js javascript library.
+ */
+
+define('WOWJS_VENDOR_URL', 'http://mynameismatthieu.com/WOW');
+define('WOWJS_DOWNLOAD_URL', 'https://github.com/matthieua/WOW/archive/master.zip');
+define('WOWJS_ANIMATE_CSS_WEBPAGE_URL', 'http://daneden.github.io/animate.css/');
+define('WOWJS_LEARN_ANIMATE_URL', 'https://github.com/daneden/animate.css');
+define('WOWJS_LEARN_WOWJS_URL', 'http://mynameismatthieu.com/WOW/docs.html');
+
+/**
+ * Implements hook_config_info().
+ */
+function wow_js_such_impress_config_info() {
+  $prefixes['wow_js_such_impress.settings'] = array(
+    'label' => t('wow_js_such_impress settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+ /**
+ * Implements hook_page_menu().
+ */
+function wow_js_such_impress_menu() {
+  $items = array();
+
+  $items['admin/config/user-interface/wow_js_such_impress'] = array(
+    'title' => 'Administer Wow JS Such Impress settings',
+    'description' => 'Administer Wow JS Such Impress settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('wow_js_such_impress_settings'),
+    'access arguments' => array('access wow_js_such_impress settings'),
+    'file' => 'wow_js_such_impress.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_libraries_info().
+ */
+function wow_js_such_impress_libraries_info() {
+  $libraries['wow'] = array(
+    'name' => 'wow',
+    'vendor url' => WOWJS_VENDOR_URL,
+    'download url' => WOWJS_DOWNLOAD_URL,
+    'version arguments' => array(
+      'file' => 'package.json',
+      'pattern' => '/((?:\d+\.?){2,3})/',
+    ),
+    'files' => array(
+      'js' => array(
+        'dist/wow.min.js',
+      ),
+    ),
+    'variants' => array(
+      'minified' => array(
+        'files' => array(
+          'js' => array(
+            'dist/wow.min.js',
+          ),
+        ),
+      ),
+      'source' => array(
+        'files' => array(
+          'js' => array(
+            'dist/wow.js',
+          ),
+        ),
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+
+/**
+ * Implements hook_init().
+ */
+function wow_js_such_impress_init() {
+  $wow_js_such_impress_visibility = config_get('wow_js_such_impress.settings', 'wow_js_such_impress_visibility');
+  $wow_js_such_impress_pages = config_get('wow_js_such_impress.settings', 'wow_js_such_impress_pages');
+  $wow_js_such_impress_demo = config_get('wow_js_such_impress.settings', 'wow_js_such_impress_demo');
+  // Compare with the internal and path alias (if any).
+  $path = backdrop_get_path_alias($_GET['q']);
+
+  // if $wow_js_such_impress_visibility is 0, then except these pages.  if $wow_js_such_impress_pages is 1, then only these pages.
+  if ($wow_js_such_impress_visibility > 0)
+  {
+    $page_match = backdrop_match_path($path, $wow_js_such_impress_pages);
+  }
+  else {
+    $page_match = !backdrop_match_path($path, $wow_js_such_impress_pages);
+  }
+
+   if ($page_match > 0)
+  {
+  // If we have a page match according to the admin settings, load up the WOW JS file.
+  backdrop_load('module', 'libraries');
+  libraries_load('wow');
+
+    if ($wow_js_such_impress_demo > 0)
+    {
+    backdrop_add_js(backdrop_get_path('module', 'wow_js_such_impress') . '/js/demo.js', array('type' => 'file', 'scope' => 'footer', 'preprocess' => TRUE));
+    }
+
+  }
+
+}

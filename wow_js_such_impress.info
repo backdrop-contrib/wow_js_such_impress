@@ -1,0 +1,8 @@
+name = WOW JS Such Impress
+description = Integrates wow.js library into BackdropCMS.
+backdrop = 1.x
+version = 1.x-1.1
+type = module
+dependencies[] = libraries
+dependencies[] = animate_css
+configure = admin/config/user-interface/wow_js_such_impress
